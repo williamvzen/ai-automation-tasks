@@ -1,11 +1,19 @@
 ---
 name: generate-timesheet
-description: Generate a timesheet or work summary from Jira issues assigned to the user. Queries Jira via Atlassian MCP for issues updated in a date range, then formats ticket key, status, and short task descriptions. Use when the user asks for a timesheet, weekly report, status update, "what I worked on," or Jira work summary from a board or project.
+description: Generates a timesheet or work summary from Jira issues assigned to the user. Queries Jira via Atlassian MCP for issues updated in a date range, then formats ticket key, status, and short task descriptions. Use when the user asks for a timesheet, weekly report, status update, "what I worked on," "last N days," or Jira work summary from a board or project.
 ---
 
 # Generate Timesheet from Jira
 
-Generate a concise timesheet by pulling assigned Jira issues updated in a given period and formatting them for status reports or time tracking.
+Generates a concise timesheet by pulling assigned Jira issues updated in a given period and formatting them for status reports or time tracking.
+
+## Quick start
+
+1. **getAccessibleAtlassianResources** → take resource `id` as **cloudId**.
+2. **atlassianUserInfo** → take **accountId** for assignee.
+3. **searchJiraIssuesUsingJql** with `assignee = "<accountId>" AND updated >= -Nd ORDER BY updated DESC` (use `-5d`, `-7d`, etc.; omit project unless user specified one). Fields: `["summary", "description", "status", "updated"]`, maxResults 50–100.
+4. For each issue output: `KEY - Status` then two one-line bullets from summary/description (plain language, no markdown).
+5. Add header (project/date range) and footer note (source: Jira, assignee, period).
 
 ## When to Use
 
@@ -32,10 +40,11 @@ Generate a concise timesheet by pulling assigned Jira issues updated in a given 
   - Last 5 days: `updated >= -5d`
   - Last 7 days: `updated >= -7d`
   - This week (approximate): `updated >= startOfWeek()`
-- **Project**: If the user specified a project or board URL, add `project = "<PROJECT_KEY>"` (e.g. `project = ECOMM`).
+- **Project**: If the user specified a project or board URL, add `project = "<PROJECT_KEY>"` (e.g. `project = ECOMM`). If no project was specified, omit the project filter (all projects).
 - **Order**: `ORDER BY updated DESC`.
-- **Example**:  
-  `project = ECOMM AND assignee = "6230c1535b6d710070a12e1b" AND updated >= -5d ORDER BY updated DESC`
+- **Examples**:  
+  All projects, last 5 days: `assignee = "6230c1535b6d710070a12e1b" AND updated >= -5d ORDER BY updated DESC`  
+  Single project: `project = ECOMM AND assignee = "6230c1535b6d710070a12e1b" AND updated >= -5d ORDER BY updated DESC`
 
 ### 3. Query Jira
 
